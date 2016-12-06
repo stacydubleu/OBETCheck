@@ -69,6 +69,55 @@ input.form-control{
 	color: #006600;
 }
 
+/* Pagination */
+.pagination-page-info {
+    padding: .6em;
+    padding-left: 0;
+    width: 40em;
+    margin: .5em;
+    margin-left: 0;
+    font-size: 15px;
+}
+
+.pagination-page-info b {
+    color: black;
+    padding-left: 2px;
+    padding: .1em .25em;
+    font-size: 110%;
+}
+
+.pagination {
+	font-size: 15px;
+	padding: 0;
+	margin: 0;
+}
+
+.pagination ul {
+	list-style-type: none;
+	float: left;
+	padding: 5px 0;
+}
+
+.pagination li {
+	float: left;
+	padding: 0;
+	font-weight: bold;
+}
+
+.pagination li a {
+    display: block;
+    color: black;
+    text-align: center;
+    padding: 10px;
+    text-decoration: none;
+}
+
+.pagination li a:hover {
+    background-color: #006600;
+    opacity: .5;
+    color: white;
+}
+
 /* Base navbar */
 .navbar-default {
   background-color: #006600;

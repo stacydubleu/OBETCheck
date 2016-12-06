@@ -49,7 +49,6 @@
         <select id="condition1" name="condition1" class="form-control">
           <option value=""></option>
           <option value="not">Not</option>
-          <option value="ignore">Ignore</option>
         </select>
         <select id="category1" name="category1" class="form-control" onchange="">
           <option value="refType">Reference Type</option>
@@ -73,26 +72,30 @@
 
     <!-- Add additional conditions to query button -->
     <button id="addbutton1" type="button" class="btn btn-default" onclick="addCondition()">+</button>
-    <button id="submit" form="advsearch" type="submit" value="advancedSearch" class="btn btn-default ">Submit</button>
+    <button id="submit" form="advsearch" type="submit" value="advancedSearch" class="btn btn-default ">Submit</button><br><br>
 
     <!-- If there are search results, display based on user preferences -->
     {% if lit %}
-      <br><br><br><br><br>
-
-      <h2>Results</h2>
+      <br><br><br>
+       <!-- Link to normal search page -->
       <p>
-        References that match your search query:
-        <b> {{ lit|length }} </b> references that match your search query:
-        <input type="checkbox" onClick="toggle(this)" /> Toggle All<br/>
+        <a href="{{ url_for('search.search') }}"> Normal Search</a>
       </p>
+
+      <div class="container">
+        <h2>Results</h2>
+      {% if total > 1 %}
+        {{ pagination.info }}
+      {% endif %}     
+        {{ pagination.links }}
+      </div>
 
       <!-- Search results table -->
       <table class="table">
           <!-- Table header defintion -->
           <thead>
             <tr>
-              <!-- Extra empty space for checkboxes -->
-              <th></th>
+              <th>Toggle All <input type="checkbox" onClick="toggle(this)" style="display: inline;"/></th>
               <!-- If user has author in their prefered view, display author etc.-->
               {%if current_user.author or preferences.author %}
                 <th>Author</th> {%endif%}
@@ -124,8 +127,8 @@
             <!-- For each result obj retrieved from the db -->
             {% for l in lit %}
               <tr>
-                <!-- Checkbox, id is id_<object_id> -->
                 <td>
+                <!-- Checkbox, id is id_<object_id> -->
                   <input type="checkbox" id="id_{{l.id}}" name="literature"
                   value="{{l.id}}">
                 </td>
@@ -173,11 +176,6 @@
   <br>
   <br>
   <br>
-
-  <!-- Link to normal search page -->
-  <p>
-    <a href="{{ url_for('search.search') }}"> Normal Search</a>
-  </p>
 
   <!-- Import external jquery script -->
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.0/jquery.min.js"></script>
@@ -290,7 +288,9 @@
       '    <option value="istartswith">Begins With</option>'+
       '  </select>'+
       '  <input id="inputtext1" class="form-control" name="inputtext1"/>'+
+      '  <button id="removebutton1" type="button" class="btn btn-default form-inline" onclick="deleteCondition()">-</button>'+
       '</div>';
+      
     // Input names (number incremented for each additional condition in query)
     var categoryId = 'category1';
     var containsId = 'contains1';
@@ -298,7 +298,7 @@
     var conditionId = 'condition1';
     var subbuttonId = 'subbutton1';
 
-    // Not currently in use
+    // When the "-" button is clicked
     function deleteCondition(idarg){
       elemNum = idarg.replace('subbutton', '');
 

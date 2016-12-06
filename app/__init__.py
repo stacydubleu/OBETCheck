@@ -1,4 +1,5 @@
-from flask import Flask, render_template
+from flask import Flask, render_template, session
+from flask.ext.session import Session
 from flask_bootstrap import Bootstrap
 from flask.ext.mail import Mail
 from flask.ext.moment import Moment
@@ -19,22 +20,43 @@ db = MongoEngine()
 
 def create_app(config_name):
     app = Flask(__name__)
+
     app.config.from_object(config[config_name])
     try:
         load_dotenv('.env')
         app.config.update(parse_dotenv('.env'))
     except TypeError:
         print('Error parsing .env')
+    app.config['SECRET_KEY']
+    app.config['SESSION_TYPE']= 'filesystem'
     app.config['MONGODB_SETTINGS'] = {
         'db': app.config['MONGO_DBNAME'],
         'host': app.config['MONGO_URI']
     }
+
+    #MAIL 
+    app.config.update(
+        DEBUG=True,
+        #EMAIL SETTINGS
+        MAIL_SERVER= app.config['MAIL_SERVER'],
+        MAIL_PORT = app.config['MAIL_PORT'],
+        MAIL_USE_TLS = False,
+        MAIL_USE_SSL = True,
+        MAIL_USERNAME = app.config['MAIL_USERNAME'],
+        MAIL_PASSWORD = app.config['MAIL_PASSWORD']
+    )
+
+    mail = Mail(app)
+
+
     config[config_name].init_app(app)
     bootstrap.init_app(app)
-    mail.init_app(app)
+    # mail.init_app(app)
     moment.init_app(app)
     db.init_app(app)
     login_manager.init_app(app)
+    
+    Session(app)
 
 # additional _init_.py file in each of these modules
     from main import main as main_blueprint

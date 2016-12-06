@@ -5,6 +5,7 @@ from app.models import User, Role, Lit
 from flask.ext.script import Manager, Shell
 
 app = create_app(os.getenv('OBET_CONFIG') or 'default')
+
 manager = Manager(app)
 #migrate = Migrate(app, db)
 

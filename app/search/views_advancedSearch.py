@@ -1,11 +1,13 @@
-from flask import render_template, redirect, url_for, flash, request, make_response
+from flask import render_template, redirect, url_for, flash, request, make_response, session
+from flask_paginate import Pagination
+from flask.ext.session import Session
 from . import search
 from .. import db
 # Import database model
 from ..models import Lit
 from mongoengine.queryset.visitor import Q
 from .refineSearch import refineList
-from .functions import litToJson, convertId
+from .functions import litToJson, convertId, downloadResults
 import json, cgi
 
 ###################
@@ -109,7 +111,13 @@ def createQuerySeg(x, first):
 @search.route('/advancedSearch', methods=['GET', 'POST'])
 def advancedSearch():
 	default_pref = {"author": True, "yrPublished": True, "title":True, "sourceTitle": True, "primaryField": True, "creator": True, "dateCreatedOn": True, "editor": False, "refType": False, "lastModified": False, "lastModifiedBy": False}
+	#default
+	page = 1
+	sessioninfo = json.dumps(request.form)
+	total = 0
+
 	# If the request made is a POST request
+
 	if request.method == 'POST':
 		try:
 			# If the button "RefineList" was the one that sent the request
@@ -156,18 +164,67 @@ def advancedSearch():
 				# print json.dumps(lit)
 				# lit = Lit.objects(Q(author__iexact = 'bob') | Q(keywords__icontains = 'only'))
 				# print json.dumps(lit)
+				total=lit.count();
 				if( len(lit) != 0 ):
 					# Convert lit to appropiate list object
 					jsonlit = litToJson(lit)
 					lit = json.loads(jsonlit)
 					lit = convertId(lit)
 					sessioninfo = json.dumps(request.form)
-					# Render advanced search page
-					return render_template('advancedSearch.html', lit = lit, sessioninfo = sessioninfo, preferences = preferences)
+					session['info'] = sessioninfo
+					session['lit'] = lit
+					session['total'] = total
+					session['preferences'] = preferences
+	
 				# Otherwise there were no results
 				else:
 					flash("Your query had no results.")
 					sessioninfo = json.dumps(request.form)
-					return render_template('advancedSearch.html', sessioninfo = sessioninfo, preferences = preferences)
+					session['info'] = sessioninfo
 
- 	return render_template('advancedSearch.html')
+	send_lit=[]
+	if request.method == 'GET': 
+		print('inside GET request if statement ')
+		if 'info' in session:
+			sessioninfo= session.get('info')
+		if 'lit' in session:
+			lit = session.get('lit')
+		if 'total' in session:
+			total = session.get('total')
+		if 'preferences' in session:
+			preferences = session.get('preferences')
+		page = request.args.get('page', type=int, default=1)
+
+	#pagination
+	start = page*30-30
+	end = page*30
+
+	lastEntry = total
+
+	temp = []
+
+	if total>30 and (total-(page*30-30))>=end:
+		for i in range(start, end):
+			temp.append(lit[i])
+		print(start, " and to ", end)
+		print('if more than 30, length of what is left:', len(temp))
+
+		send_lit.extend(temp)
+
+	else:
+		for i in range(start, lastEntry):
+			temp.append(lit[i])
+		print(start, " and to ", lastEntry+1)
+		print('length of what is left:', len(temp))
+
+		send_lit.extend(temp)
+
+	pagination = Pagination(
+		page=page, 
+		per_page=30, 
+		total=total, 
+		record_name='references'
+	)	
+
+	return render_template('advancedSearch.html', lit = send_lit, pagination = pagination, total = total, sessioninfo = sessioninfo, preferences = preferences)
+

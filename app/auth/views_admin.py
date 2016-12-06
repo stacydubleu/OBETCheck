@@ -38,7 +38,7 @@ def approveUser(email):
     token = user.generate_confirmation_token()
 
     # Send email to user
-    send_email(user.email, 'You\'ve been accepted to join OBET! Please confirm your account.', 'auth/email/confirm', user = user, token = token)
+    send_email(user.email, 'You\'ve been accepted to join OBET! Please confirm your account.', 'email/confirm', user = user, token = token)
     flash('The user has been emailed their confirmation information.')
 
     # Approve user
@@ -66,7 +66,7 @@ def rejectUser(email):
         reason = form.reason.data
         admin = current_user
         # Send email to user on their rejection
-        send_email(user.email, 'Your OBET User Status', 'auth/email/rejectNotice', user = user, reason = reason, admin = admin)
+        send_email(user.email, 'Your OBET User Status', 'email/rejectNotice', user = user, reason = reason, admin = admin)
         flash('The user has been emailed their rejection.')
         # Delete user
         user.delete()

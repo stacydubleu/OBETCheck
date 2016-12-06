@@ -10,6 +10,11 @@ import json
 # Fuzzy Search
 ##################
 
+
+# Default user preferences for search result fields display
+default_pref = {"author": True, "yrPublished": True, "title":True, "sourceTitle": True, "primaryField": True, "creator": True, "dateCreatedOn": True, "editor": False, "refType": False, "lastModified": False, "lastModifiedBy": False}
+  
+
 def fuzzySearch(request):
 
 	# Create new search form
@@ -26,21 +31,20 @@ def fuzzySearch(request):
 
  	# If the user searched with an empty string simply return
  	if(queryString == ''):
- 		flash("Your search returned nothing. Try other search terms.")
-		return render_template('search.html', form = form, lit = None)
+		return (form, None, 0, default_pref)
 
 	# Otherwise so a text search in the database
  	lit = Lit.objects.search_text(queryString).order_by('$text_score')
 
   	# If there were no results, return page
   	if len(lit) == 0:
- 		flash("Your search returned nothing. Try other search terms.")
-		return render_template('search.html', form = form, lit = lit)
+		return (form, lit, 0, default_pref)
 
 	# Otherwise return the page with the search results
-	else:
+	if len(lit) > 0:
 		form.sort.data = ''
 
+		total = lit.count()
 		# Convert lit to appropiate list object
 		jsonlit = litToJson(lit)
 		lit = json.loads(jsonlit)
@@ -59,4 +63,4 @@ def fuzzySearch(request):
 
 			# Otherwise convert the cookie to a python object
 			preferences = json.loads(preferences)
-		return render_template('search.html', form = form, lit = lit, preferences = preferences)
+		return (form, lit, total, preferences)

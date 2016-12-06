@@ -159,13 +159,22 @@
 
     {{ wtf.quick_form(form) }} <br><br>
 
+    <p>
+      <br> <a href="{{ url_for('search.advancedSearch') }}"> Advanced Search </a>
+    </p>
+    
     <!-- If there are search results, display based on user preferences -->
     {% if lit %}
+      <br><br><br>
       <div class="container">
         <h2>Results</h2>
+      {% if total > 1 %}
+        {{ pagination.info }}
+      {% endif %}     
+        {{ pagination.links }}
+        
         <p>
           <b> {{ lit|length }} </b> references that match your search query:
-          <input type="checkbox" onClick="toggle(this)" /> Toggle All<br/>
         </p>
 
         <!-- Search results table -->
@@ -173,9 +182,8 @@
           <!-- Table header defintion -->
           <thead>
             <tr>
-              <!-- Extra empty space for checkboxes -->
-              <th></th>
               <!-- If user has author in their prefered view, display author etc.-->
+              <th>Toggle All <input type="checkbox" onClick="toggle(this)" style="display: inline;"/></th>
               {%if current_user.author or preferences.author %}
                 <th>Author</th> {%endif%}
               {%if current_user.yrPublished or preferences.yrPublished %}
@@ -263,10 +271,6 @@
   </select>
 
 </form> <button type="submit" form="sort" value="Sort"> Sort </button> -->
-
-    <p>
-      <br> <a href="{{ url_for('search.advancedSearch') }}"> Advanced Search </a>
-    </p>
   </div>
 {% endblock %}
 

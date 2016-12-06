@@ -9,10 +9,11 @@ from wtforms.fields.html5 import EmailField
 from wtforms.validators import Required, Length, Optional, Email, Regexp, NumberRange, URL
 from wtforms import ValidationError
 from wtforms import widgets
+from ..models import User
 #from flask.ext.pagedown.fields import PageDownField
 
 # Import database models
-from ..models import User, Lit, Role
+from ..models import Lit, Role
 
 # Search form for index.html (main page)
 class SearchFormMain(Form):
